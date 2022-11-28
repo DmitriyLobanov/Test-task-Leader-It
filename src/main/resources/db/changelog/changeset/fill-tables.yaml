@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      author: Dmitriy
+      id: fill-data-base
+      changes:
+        - insert:
+            tableName: client
+            columns:
+              - column:
+                  name: first_name
+                  value: Dmitriy
+              - column:
+                  name: second_name
+                  value: Lobanov
+              - column:
+                  name: surname
+                  value: Alexandrovich
+              - column:
+                  name: secret_key
+                  value: $2a$10$fgYCkA5heQ5g9D/8.9.I9.EfvekwG7Z2wdUymPYtTFxkCqkaQmM9.
+        - insert:
+            tableName: client_bank_account
+            columns:
+              - column:
+                  name: account_number
+                  value: 104123123
+              - column:
+                  name: amount
+                  value: 300.00
+              - column:
+                  name: account_type
+                  value: CURRENT
+              - column:
+                  name: validity
+                  value: '2022-12-28'
+              - column:
+                  name: client_id
+                  value: 1
+        - insert:
+            tableName: client_bank_account
+            columns:
+              - column:
+                  name: account_number
+                  value: 2023123
+              - column:
+                  name: amount
+                  value: 150.00
+              - column:
+                  name: account_type
+                  value: CURRENT
+              - column:
+                  name: validity
+                  value: '2022-11-25'
+              - column:
+                  name: client_id
+                  value: 1

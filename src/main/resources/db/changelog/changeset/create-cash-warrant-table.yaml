@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-cash-warrant-table
+      author: Dmitriy
+      changes:
+        - createTable:
+            tableName: cash_warrant
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: warrant_type
+                  type: varchar(40)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: numeric
+                  constraints:
+                    nullable: false
+              - column:
+                  name: execution_result
+                  type: varchar(40)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: client_account_cash_warrant_fk
+                    referencedTableName: client_bank_account
+                    referencedColumnNames: id

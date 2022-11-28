@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:13.8
+    restart: always
+    environment:
+      POSTGRES_DB: "test_app_db"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    volumes:
+      # volume for db data
+      - ./postgres-data:/var/lib/postgresql/data
+      # init create tables script
+#      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      # init fill tables data script
+#      - ./sql/fill_tables.sql:/docker-entrypoint-initdb.d/fill_tables.sql
+    ports:
+      - "5432:5432"
+
+#  pgadmin:
+#    container_name: pgadmin4_container
+#    image: dpage/pgadmin4
+#    restart: unless-stopped
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+#      PGADMIN_DEFAULT_PASSWORD: admin
+#    ports:
+#      - "5050:80"

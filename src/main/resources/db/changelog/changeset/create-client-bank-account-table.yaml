@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-client-bank-account
+      author: Dmitriy
+      changes:
+        - createTable:
+            tableName: client_bank_account
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_number
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: amount
+                  type: numeric
+              - column:
+                  name: account_type
+                  type: varchar(40)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: validity
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: client_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: client_client_account_fk
+                    referencedTableName: client
+                    referencedColumnNames: id
