@@ -11,11 +11,11 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "transaction")
+@Table(name = "transactions")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Transaction {
+public class TransactionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,15 +33,15 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "beneficiary_bank_account_id", nullable = false)
-    private ClientBankAccount beneficiaryClientAccount;
+    private ClientBankAccountEntity beneficiaryClientAccount;
 
     @ManyToOne
     @JoinColumn(name = "cash_warrant_id")
-    private CashWarrant cashWarrant;
+    private CashWarrantEntity cashWarrantEntity;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_bank_account_id")
-    private ClientBankAccount senderBankAccount;
+    private ClientBankAccountEntity senderBankAccount;
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "execution_result", nullable = false)

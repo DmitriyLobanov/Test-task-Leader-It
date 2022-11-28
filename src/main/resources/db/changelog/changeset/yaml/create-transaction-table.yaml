@@ -4,7 +4,7 @@ databaseChangeLog:
       author: Dmitriy
       changes:
         - createTable:
-            tableName: transaction
+            tableName: transactions
             columns:
               - column:
                   name: id
@@ -40,19 +40,19 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                     foreignKeyName: client_account_beneficiary_transaction_fk
-                    referencedTableName: client_bank_account
+                    referencedTableName: client_bank_accounts
                     referencedColumnNames: id
               - column:
                   name: sender_bank_account_id
                   type: bigint
                   constraints:
                     foreignKeyName: client_account_sender_transaction_fk
-                    referencedTableName: client_bank_account
+                    referencedTableName: client_bank_accounts
                     referencedColumnNames: id
               - column:
                   name: cash_warrant_id
                   type: bigint
                   constraints:
                     foreignKeyName: cash_warrant_transaction_fk
-                    referencedTableName: cash_warrant
+                    referencedTableName: cash_warrants
                     referencedColumnNames: id

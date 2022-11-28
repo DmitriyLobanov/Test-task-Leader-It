@@ -1,7 +1,7 @@
 package com.lobanov.financeservice.mappers;
 
 import com.lobanov.financeservice.dtos.TransactionDto;
-import com.lobanov.financeservice.models.Transaction;
+import com.lobanov.financeservice.models.TransactionEntity;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class TransactionMapper {
 
-    public TransactionDto toDto(Transaction entity) {
-        Long cashWarrantId = (entity.getCashWarrant()) != null ? entity.getCashWarrant().getId() : null;
+    public TransactionDto toDto(TransactionEntity entity) {
+        Long cashWarrantId = (entity.getCashWarrantEntity()) != null ? entity.getCashWarrantEntity().getId() : null;
         Long senderBankAccountId = (entity.getSenderBankAccount()) != null ? entity.getSenderBankAccount().getId() : null;
         return TransactionDto.builder()
                 .id(entity.getId())

@@ -4,7 +4,7 @@ databaseChangeLog:
       id: fill-data-base
       changes:
         - insert:
-            tableName: client
+            tableName: clients
             columns:
               - column:
                   name: first_name
@@ -19,7 +19,22 @@ databaseChangeLog:
                   name: secret_key
                   value: $2a$10$fgYCkA5heQ5g9D/8.9.I9.EfvekwG7Z2wdUymPYtTFxkCqkaQmM9.
         - insert:
-            tableName: client_bank_account
+            tableName: clients
+            columns:
+              - column:
+                  name: first_name
+                  value: Sergei
+              - column:
+                  name: second_name
+                  value: Simonov
+              - column:
+                  name: surname
+                  value: Evgenyevich
+              - column:
+                  name: secret_key
+                  value: $2a$10$jzCcUD2P6V8RE896byEdGOnSXFJKzKfqViscie.eGo2ARpg5c3oBe
+        - insert:
+            tableName: client_bank_accounts
             columns:
               - column:
                   name: account_number
@@ -37,20 +52,41 @@ databaseChangeLog:
                   name: client_id
                   value: 1
         - insert:
-            tableName: client_bank_account
+            tableName: client_bank_accounts
             columns:
               - column:
                   name: account_number
-                  value: 2023123
+                  value: 115231223
               - column:
                   name: amount
                   value: 150.00
               - column:
                   name: account_type
-                  value: CURRENT
+                  value: CHECKING
               - column:
                   name: validity
                   value: '2022-11-25'
               - column:
                   name: client_id
                   value: 1
+#        - insert:
+#            tableName: cash_warrants
+#            columns:
+#              - column:
+#                  name: transaction_type
+#                  value: TRANSFER
+#              - column:
+#                  name: amount
+#                  value: 150.00
+#              - column:
+#                  name: beneficiaryClientAccount
+#                  value: 2
+#              - column:
+#                  name: senderBankAccount
+#                  value: 1
+#              - column:
+#                  name: validity
+#                  value: '2022-11-25'
+#              - column:
+#                  name: client_id
+#                  value: 1

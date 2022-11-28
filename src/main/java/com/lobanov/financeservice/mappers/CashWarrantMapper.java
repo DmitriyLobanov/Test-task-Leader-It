@@ -1,26 +1,29 @@
 package com.lobanov.financeservice.mappers;
 
-import com.lobanov.financeservice.dtos.CashWarrantDto;
-import com.lobanov.financeservice.models.CashWarrant;
+import com.lobanov.financeservice.dtos.requests.CashWarrantDtoRequest;
+import com.lobanov.financeservice.dtos.responses.CashWarrantDtoResponse;
+import com.lobanov.financeservice.models.CashWarrantEntity;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CashWarrantMapper {
 
-    public CashWarrantDto toDto(CashWarrant entity) {
-        return CashWarrantDto.builder()
+    public CashWarrantDtoResponse toDto(CashWarrantEntity entity) {
+        return CashWarrantDtoResponse.builder()
                 .id(entity.getId())
                 .warrantType(entity.getWarrantType())
                 .amount(entity.getAmount())
-                .clientBankAccountId(entity.getClientBankAccount().getId())
+                .executionResult(entity.getExecutionResult())
+                .createdDate(entity.getCreatedDate())
+                .clientBankAccountId(entity.getClientBankAccountEntity().getId())
                 .build();
     }
 
-    public CashWarrant toEntity(CashWarrantDto dto) {
-        return CashWarrant.builder()
+    public CashWarrantEntity toEntity(CashWarrantDtoRequest dto) {
+        return CashWarrantEntity.builder()
                 .id(dto.getId())
                 .warrantType(dto.getWarrantType())
-                .clientBankAccount(null)
+                .clientBankAccountEntity(null)
                 .amount(dto.getAmount())
                 .build();
 

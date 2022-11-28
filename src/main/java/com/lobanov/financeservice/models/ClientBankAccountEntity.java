@@ -12,11 +12,11 @@ import java.time.LocalDate;
 
 @Entity
 //TODO ИЗМЕНИТЬ НАЗВАНИЕ ТАБЛИТЦЫ
-@Table(name = "client_bank_account")
+@Table(name = "client_bank_accounts")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClientBankAccount {
+public class ClientBankAccountEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +38,7 @@ public class ClientBankAccount {
     @Column(name = "validity", nullable = false)
     private LocalDate validity;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    private ClientEntity clientEntity;
 }

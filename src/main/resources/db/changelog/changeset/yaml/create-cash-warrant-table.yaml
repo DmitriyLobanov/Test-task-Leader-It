@@ -4,7 +4,7 @@ databaseChangeLog:
       author: Dmitriy
       changes:
         - createTable:
-            tableName: cash_warrant
+            tableName: cash_warrants
             columns:
               - column:
                   name: id
@@ -39,5 +39,5 @@ databaseChangeLog:
                   type: bigint
                   constraints:
                     foreignKeyName: client_account_cash_warrant_fk
-                    referencedTableName: client_bank_account
+                    referencedTableName: client_bank_accounts
                     referencedColumnNames: id

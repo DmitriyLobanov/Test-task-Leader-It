@@ -1,14 +1,18 @@
 package com.lobanov.financeservice.services;
 
-import com.lobanov.financeservice.dtos.CashWarrantDto;
+import com.lobanov.financeservice.dtos.requests.CashWarrantDtoRequest;
+import com.lobanov.financeservice.dtos.responses.CashWarrantDtoResponse;
 import com.lobanov.financeservice.enums.ExecutionResult;
 import com.lobanov.financeservice.enums.TransactionType;
 import com.lobanov.financeservice.enums.WarrantType;
+import com.lobanov.financeservice.exceptions.NotEnoughMoneyException;
 import com.lobanov.financeservice.exceptions.ResourceNotFoundException;
+import com.lobanov.financeservice.exceptions.ValidityExpiredException;
+import com.lobanov.financeservice.exceptions.WrongSecretKeyException;
 import com.lobanov.financeservice.mappers.CashWarrantMapper;
-import com.lobanov.financeservice.models.CashWarrant;
-import com.lobanov.financeservice.models.ClientBankAccount;
-import com.lobanov.financeservice.models.Transaction;
+import com.lobanov.financeservice.models.CashWarrantEntity;
+import com.lobanov.financeservice.models.ClientBankAccountEntity;
+import com.lobanov.financeservice.models.TransactionEntity;
 import com.lobanov.financeservice.repositories.CashWarrantRepository;
 import com.lobanov.financeservice.repositories.ClientBankAccountRepository;
 import com.lobanov.financeservice.repositories.TransactionRepository;
@@ -36,94 +40,99 @@ public class CashWarrantService {
 
     private final BCryptPasswordEncoder encoder;
 
-    public List<CashWarrantDto> findAllCashWarrantsByClientBankAccountId(Long clientBankAccountId) {
+    public List<CashWarrantDtoResponse> findAllCashWarrantsByClientBankAccountId(Long clientBankAccountId) {
         return cashWarrantRepository.findCashWarrantsByClientBankAccountId(clientBankAccountId).stream()
                 .map(cashWarrantMapper::toDto).collect(Collectors.toList());
     }
 
+    public ExecutionResult createReplenishmentCashWarrant(CashWarrantDtoRequest cashWarrantDtoRequest) {
+        ExecutionResult executionResult;
+        ClientBankAccountEntity clientBankAccountEntity = clientBankAccountRepository
+                .findById(cashWarrantDtoRequest.getBeneficiaryClientAccount())
+                .orElseThrow(() -> new ResourceNotFoundException("Client Bank account with id " + cashWarrantDtoRequest.getBeneficiaryClientAccount() + " not found"));
+
+        executionResult = SUCCESS;
+        CashWarrantEntity cashWarrantEntity = cashWarrantMapper.toEntity(cashWarrantDtoRequest);
+        cashWarrantEntity.setClientBankAccountEntity(clientBankAccountEntity);
+        cashWarrantEntity.setWarrantType(WarrantType.REPLENISHMENT);
+        cashWarrantEntity.setExecutionResult(executionResult);
+        cashWarrantEntity.setCreatedDate(Instant.now());
+
+        TransactionEntity transactionEntity = new TransactionEntity();
+        transactionEntity.setAmount(cashWarrantDtoRequest.getAmount());
+        transactionEntity.setBeneficiaryClientAccount(clientBankAccountEntity);
+        transactionEntity.setTransactionType(TransactionType.REPLENISHMENT);
+        transactionEntity.setCreatedDate(Instant.now());
+        transactionEntity.setExecutionResult(executionResult);
+        transactionEntity.setCashWarrantEntity(cashWarrantEntity);
+
+        if (!isNotValidityExpired(clientBankAccountEntity.getValidity())) {
+            saveResourcesInDataBase(FAILED_VALIDITY_EXPIRED, transactionEntity, cashWarrantEntity);
+            throw new ValidityExpiredException("Client account with id " + clientBankAccountEntity.getId() + " overdue");
+        }
+        clientBankAccountEntity.setAmount(clientBankAccountEntity.getAmount().add(cashWarrantDtoRequest.getAmount()));
+        cashWarrantRepository.save(cashWarrantEntity);
+        transactionRepository.save(transactionEntity);
+        return executionResult;
+
+    }
 
 
-    private boolean validThru(LocalDate validity) {
+    public ExecutionResult createWithdrawalCashWarrant(CashWarrantDtoRequest cashWarrantDtoRequest) {
+        ClientBankAccountEntity clientBankAccountEntity = clientBankAccountRepository
+                .findById(cashWarrantDtoRequest.getBeneficiaryClientAccount())
+                .orElseThrow(() -> new ResourceNotFoundException("Client Bank account with id " + cashWarrantDtoRequest.getBeneficiaryClientAccount() + " not found"));
+
+        ExecutionResult executionResult;
+        CashWarrantEntity cashWarrantEntity = cashWarrantMapper.toEntity(cashWarrantDtoRequest);
+        cashWarrantEntity.setClientBankAccountEntity(clientBankAccountEntity);
+        cashWarrantEntity.setWarrantType(WarrantType.WITHDRAWAL);
+        cashWarrantEntity.setCreatedDate(Instant.now());
+
+        TransactionEntity transactionEntity = new TransactionEntity();
+        transactionEntity.setTransactionType(TransactionType.WITHDRAWAL);
+        transactionEntity.setAmount(cashWarrantDtoRequest.getAmount());
+        transactionEntity.setCreatedDate(Instant.now());
+        transactionEntity.setBeneficiaryClientAccount(clientBankAccountEntity);
+        transactionEntity.setCashWarrantEntity(cashWarrantEntity);
+
+        boolean secretKeyMatches = isSecretKeyMatches(cashWarrantDtoRequest.getSecretKey(), clientBankAccountEntity.getClientEntity().getSecretKey());
+        boolean isEnoughMoney = clientBankAccountEntity.getAmount().compareTo(cashWarrantDtoRequest.getAmount()) > 0;
+
+        //TODO логгирование
+
+        if (!secretKeyMatches) {
+            saveResourcesInDataBase(FAILED_WRONG_SECRET_KEY, transactionEntity, cashWarrantEntity);
+            throw new WrongSecretKeyException("Invalid secret key");
+        }
+
+        if (!isNotValidityExpired(clientBankAccountEntity.getValidity())) {
+            saveResourcesInDataBase(FAILED_VALIDITY_EXPIRED, transactionEntity, cashWarrantEntity);
+            throw new ValidityExpiredException("Client account with id " + clientBankAccountEntity.getId() + " overdue");
+        }
+
+        if (!isEnoughMoney) {
+            saveResourcesInDataBase(FAILED_NOT_ENOUGH_MONEY, transactionEntity, cashWarrantEntity);
+            throw new NotEnoughMoneyException("Not enough money on the account with id " + clientBankAccountEntity.getId());
+        }
+        clientBankAccountEntity.setAmount(clientBankAccountEntity.getAmount().subtract(cashWarrantDtoRequest.getAmount()));
+        executionResult = SUCCESS;
+        saveResourcesInDataBase(executionResult, transactionEntity, cashWarrantEntity);
+        return executionResult;
+    }
+
+    private void saveResourcesInDataBase(ExecutionResult exRes, TransactionEntity transaction, CashWarrantEntity cashWarrant) {
+        transaction.setExecutionResult(exRes);
+        cashWarrant.setExecutionResult(exRes);
+        cashWarrantRepository.save(cashWarrant);
+        transactionRepository.save(transaction);
+    }
+
+    private boolean isNotValidityExpired(LocalDate validity) {
         return LocalDate.now().isBefore(validity);
     }
 
-    public boolean isSecretKeyMatches(String rawSecretKey, String encodedSecretKey) {
+    private boolean isSecretKeyMatches(String rawSecretKey, String encodedSecretKey) {
         return encoder.matches(rawSecretKey, encodedSecretKey);
-    }
-
-    public ExecutionResult createReplenishmentCashWarrant(CashWarrantDto cashWarrantDto) {
-        ExecutionResult executionResult;
-        // ТУТ ИЛИ ЗАПРОС ЧЕРЕЗ ДЖОИНЫ ИДИ EAGER делать
-        ClientBankAccount clientBankAccount = clientBankAccountRepository
-                .findById(cashWarrantDto.getClientBankAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException("Client Bank account with id " + cashWarrantDto.getClientBankAccountId() + " not found"));
-
-        if (!validThru(clientBankAccount.getValidity()))  {
-            executionResult = FAILED_VALIDITY_EXPIRED;
-        } else {
-            clientBankAccount.setAmount(clientBankAccount.getAmount().add(cashWarrantDto.getAmount()));
-            executionResult = SUCCESS;
-        }
-
-        CashWarrant cashWarrant = cashWarrantMapper.toEntity(cashWarrantDto);
-        cashWarrant.setClientBankAccount(clientBankAccount);
-        cashWarrant.setWarrantType(WarrantType.REPLENISHMENT);
-        cashWarrant.setExecutionResult(executionResult);
-        cashWarrant.setCreatedDate(Instant.now());
-
-        Transaction transaction = new Transaction();
-        transaction.setAmount(cashWarrantDto.getAmount());
-        transaction.setBeneficiaryClientAccount(clientBankAccount);
-        transaction.setTransactionType(TransactionType.REPLENISHMENT);
-        transaction.setCreatedDate(Instant.now());
-        transaction.setExecutionResult(executionResult);
-        transaction.setCashWarrant(cashWarrant);
-
-        cashWarrantRepository.save(cashWarrant);
-        transactionRepository.save(transaction);
-        return  executionResult;
-
-    }
-
-    public ExecutionResult createWithdrawalCashWarrant(CashWarrantDto cashWarrantDto) {
-        // ТУТ ИЛИ ЗАПРОС ЧЕРЕЗ ДЖОИНЫ ИДИ EAGER делать
-        ClientBankAccount clientBankAccount = clientBankAccountRepository
-                .findById(cashWarrantDto.getClientBankAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException("Client Bank account with id " + cashWarrantDto.getClientBankAccountId() + " not found"));
-
-        ExecutionResult executionResult;
-        CashWarrant cashWarrant = cashWarrantMapper.toEntity(cashWarrantDto);
-        cashWarrant.setClientBankAccount(clientBankAccount);
-        cashWarrant.setWarrantType(WarrantType.WITHDRAWAL);
-        cashWarrant.setCreatedDate(Instant.now());
-
-        Transaction transaction = new Transaction();
-        transaction.setTransactionType(TransactionType.WITHDRAWAL);
-        transaction.setAmount(cashWarrantDto.getAmount());
-        transaction.setCreatedDate(Instant.now());
-        transaction.setBeneficiaryClientAccount(clientBankAccount);
-
-        boolean secretKeyMatches = isSecretKeyMatches(cashWarrantDto.getSecretKey(), clientBankAccount.getClient().getSecretKey());
-        boolean isNotEnoughMoney = clientBankAccount.getAmount().compareTo(cashWarrantDto.getAmount()) < 0;
-
-        if (!secretKeyMatches) {
-            executionResult = FAILED_WRONG_SECRET_KEY;
-            transaction.setExecutionResult(executionResult);//secretKeyFailed
-            cashWarrant.setExecutionResult(executionResult);
-        } else {
-            if (isNotEnoughMoney) {
-                executionResult = FAILED_NOT_ENOUGH_MONEY;
-                transaction.setExecutionResult(executionResult);// недостаточно денег
-                cashWarrant.setExecutionResult(executionResult);
-            } else {
-                clientBankAccount.setAmount(clientBankAccount.getAmount().subtract(cashWarrantDto.getAmount()));
-                executionResult = SUCCESS;
-                cashWarrant.setExecutionResult(executionResult);
-                transaction.setExecutionResult(executionResult);
-            }
-        }
-        cashWarrantRepository.save(cashWarrant);
-        transactionRepository.save(transaction);
-        return  executionResult;
     }
 }

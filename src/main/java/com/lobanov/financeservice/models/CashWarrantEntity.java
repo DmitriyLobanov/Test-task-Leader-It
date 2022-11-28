@@ -12,12 +12,12 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "cash_warrant")
+@Table(name = "cash_warrants")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CashWarrant {
+public class CashWarrantEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +30,9 @@ public class CashWarrant {
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
-    private ClientBankAccount clientBankAccount;
+    private ClientBankAccountEntity clientBankAccountEntity;
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "execution_result",nullable = false)

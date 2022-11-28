@@ -1,6 +1,5 @@
 package com.lobanov.financeservice.controllers;
 
-import com.lobanov.financeservice.dtos.CashWarrantDto;
 import com.lobanov.financeservice.dtos.ClientDto;
 import com.lobanov.financeservice.dtos.CreateClientDto;
 import com.lobanov.financeservice.services.ClientService;
@@ -29,13 +28,4 @@ public class ClientController {
         ClientDto clientDto = clientService.getClientById(clientId);
         return ResponseEntity.ok(clientDto);
     }
-
-    @PostMapping
-    public ResponseEntity<Long> createClient(@RequestBody CreateClientDto createClientDto) {
-        ClientDto clientDto = clientService.createClient(createClientDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(clientDto.getId());
-    }
-
-
-
 }

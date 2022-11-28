@@ -27,4 +27,46 @@ public class RestExceptionHandler {
                         .build()
                 );
     }
+    @ExceptionHandler(value = NotEnoughMoneyException.class)
+    public ResponseEntity<Object> handleNotEnoughMoneyException(NotEnoughMoneyException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("exception", ex.getClass().getName());
+        return ResponseEntity.status(status)
+                .body(CustomResponse.builder()
+                        .timeStamp(now())
+                        .message(ex.getMessage())
+                        .errors(errorMap)
+                        .build()
+                );
+    }
+
+    @ExceptionHandler(value = WrongSecretKeyException.class)
+    public ResponseEntity<Object> handleWrongSecretKeyException(WrongSecretKeyException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("exception", ex.getClass().getName());
+        return ResponseEntity.status(status)
+                .body(CustomResponse.builder()
+                        .timeStamp(now())
+                        .message(ex.getMessage())
+                        .errors(errorMap)
+                        .build()
+                );
+    }
+
+    @ExceptionHandler(value = ValidityExpiredException.class)
+    public ResponseEntity<Object> handleValidityExpiredException(ValidityExpiredException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("exception", ex.getClass().getName());
+        return ResponseEntity.status(status)
+                .body(CustomResponse.builder()
+                        .timeStamp(now())
+                        .message(ex.getMessage())
+                        .errors(errorMap)
+                        .build()
+                );
+    }
+
 }

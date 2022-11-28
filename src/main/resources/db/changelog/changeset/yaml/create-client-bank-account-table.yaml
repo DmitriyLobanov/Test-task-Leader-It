@@ -4,7 +4,7 @@ databaseChangeLog:
       author: Dmitriy
       changes:
         - createTable:
-            tableName: client_bank_account
+            tableName: client_bank_accounts
             columns:
               - column:
                   name: id
@@ -43,5 +43,5 @@ databaseChangeLog:
                   type: bigint
                   constraints:
                     foreignKeyName: client_client_account_fk
-                    referencedTableName: client
+                    referencedTableName: clients
                     referencedColumnNames: id
