@@ -271,9 +271,9 @@ ________________________
 ```json
 {
     "beneficiaryClientBankAccountId": 1,
-    "senderClientBankAccountId": 3,
-    "amount": 19.9999,
-    "secretKey": "test"
+    "senderClientBankAccountId": 4,
+    "amount": 1.9999,
+    "secretKey": "Sergei"
 }
 ```
 ### Ответ
