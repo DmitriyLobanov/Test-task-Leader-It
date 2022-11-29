@@ -16,7 +16,7 @@ ________________________
 
 ### `GET http://localhost:8080/api/v1/clients`
 
-### Ответ
+### Ответ HttpStatus = 200
 ```json
 [
     {
@@ -40,7 +40,7 @@ ________________________
 
 ### `GET http://localhost:8080/api/v1/clients/1`
 
-### Ответ
+### Ответ HttpStatus = 200
 ```json
 {
     "id": 1,
@@ -50,13 +50,13 @@ ________________________
 }
 ```
 
-## 3.  Получить информацию о счетах клиента
+## 3.  Получить информацию о счетах клиента 
 
 ### Запрос 
 
-### `GET http://localhost:8080/api/v1/bank_account/1`
+### `GET http://localhost:8080/api/v1/bank-account/1`
 
-### Ответ
+### Ответ HttpStatus = 200
 ```json
 [
     {
@@ -93,18 +93,27 @@ ________________________
 
 ### Запрос 
 
-### `GET http://localhost:8080/api/v1/bank_account/1/transactions`
+### `GET  http://localhost:8080/api/v1/bank-account/1/transactions`
 
-# Ответ
+### Ответ
 ```json
 [
     {
         "id": 1,
-        "createdDate": "2022-11-28T10:21:09.416843Z",
+        "createdDate": "2022-11-29T06:42:22.894137Z",
+        "amount": 100.00,
+        "transactionType": "REPLENISHMENT",
+        "beneficiaryClientBankAccountId": 1,
+        "cashWarrantId": 1,
+        "executionResult": "SUCCESS"
+    },
+    {
+        "id": 2,
+        "createdDate": "2022-11-29T06:42:22.894137Z",
         "amount": 10000.00,
         "transactionType": "WITHDRAWAL",
         "beneficiaryClientBankAccountId": 1,
-        "cashWarrantId": 1,
+        "cashWarrantId": 2,
         "executionResult": "FAILED_NOT_ENOUGH_MONEY"
     }
 ]
@@ -114,9 +123,9 @@ ________________________
 
 ### Запрос 
 
-### `GET http://localhost:8080/api/v1/bank_account/1/warrants`
+### `GET http://localhost:8080/api/v1/bank-account/1/warrants`
 
-# Ответ
+### Ответ 
 ```json
 [
     {
@@ -125,7 +134,7 @@ ________________________
         "amount": 100.00,
         "clientBankAccountId": 1,
         "executionResult": "SUCCESS",
-        "createdDate": "2022-11-28T10:21:09.416843Z"
+        "createdDate": "2022-11-29T06:42:22.894137Z"
     },
     {
         "id": 2,
@@ -133,23 +142,7 @@ ________________________
         "amount": 10000.00,
         "clientBankAccountId": 1,
         "executionResult": "FAILED_NOT_ENOUGH_MONEY",
-        "createdDate": "2022-11-28T10:21:09.416843Z"
-    },
-    {
-        "id": 3,
-        "warrantType": "WITHDRAWAL",
-        "amount": 1000,
-        "clientBankAccountId": 1,
-        "executionResult": "FAILED_WRONG_SECRET_KEY",
-        "createdDate": "2022-11-28T10:24:12.630Z"
-    },
-    {
-        "id": 4,
-        "warrantType": "WITHDRAWAL",
-        "amount": 1000,
-        "clientBankAccountId": 1,
-        "executionResult": "FAILED_WRONG_SECRET_KEY",
-        "createdDate": "2022-11-28T10:29:16.253Z"
+        "createdDate": "2022-11-29T06:42:22.894137Z"
     }
 ]
 ```
@@ -158,7 +151,7 @@ ________________________
 
 ### Запрос 
 
-### `POST localhost:8080/api/v1/bank_account/warrant`
+### `POST localhost:8080/api/v1/bank-account/warrant`
 
 ```json
 {
@@ -169,10 +162,44 @@ ________________________
 }
 ```
 
-# Ответ 
+## Ответ
+### Случай успешного запроса
 ```json
 {
-    "executionResult": "FAILED_WRONG_SECRET_KEY"
+    "executionResult": "SUCCESS"
+}
+```
+
+### Случай неправильного секретного слова
+```json
+{
+    "timeStamp": "2022-11-29T13:46:50.719",
+    "message": "Invalid secret key",
+    "errors": {
+        "exception": "com.lobanov.financeservice.exceptions.WrongSecretKeyException"
+    }
+}
+```
+
+### Случай создания кассового ордера с суммой, превышающей сумму на счете клиента
+```json
+{
+    "timeStamp": "2022-11-29T13:46:37.598",
+    "message": "Not enough money on the account with id 1",
+    "errors": {
+        "exception": "com.lobanov.financeservice.exceptions.NotEnoughMoneyException"
+    }
+}
+```
+
+### Случай создания кассового ордера для счета клиента, у которого срок его дейсвитя истек
+```json
+{
+    "timeStamp": "2022-11-29T13:48:28.999",
+    "message": "Client bank account with id 3 overdue",
+    "errors": {
+        "exception": "com.lobanov.financeservice.exceptions.ValidityExpiredException"
+    }
 }
 ```
 
@@ -193,32 +220,66 @@ ________________________
 
 ### Ответ
 
+### Случай успешного запроса
 ```json
 {
     "executionResult": "SUCCESS"
 }
 ```
 
+### Случай неправильного секретного слова
+```json
+{
+    "timeStamp": "2022-11-29T13:53:43.994",
+    "message": "Wrong secret key",
+    "errors": {
+        "exception": "com.lobanov.financeservice.exceptions.WrongSecretKeyException"
+    }
+}
+```
+
+### Случай создания перевода с суммой, превышающей сумму на счете клиента
+```json
+{
+    "timeStamp": "2022-11-29T13:54:20.889",
+    "message": "Not enough money on the account with id 2",
+    "errors": {
+        "exception": "com.lobanov.financeservice.exceptions.NotEnoughMoneyException"
+    }
+}
+```
+
+### Случай создания перевода для счета клиента, у которого срок его дейсвитя истек
+```json
+{
+    "timeStamp": "2022-11-29T13:54:55.084",
+    "message": "Client  bank account is overdue",
+    "errors": {
+        "exception": "com.lobanov.financeservice.exceptions.ValidityExpiredException"
+    }
+}
+```
+
+#
 
 ## 8.  Создать перевод между счетами разных пользователей
 
-### Запрос 
+### Логика обработки запроса такая же  как в 7 пункте. Для перевода межу разными счетами в теле запроса указываются соответсующие   beneficiaryClientBankAccountId и senderClientBankAccountId
 
 ### `POST http://localhost:8080/api/v1/transfer`
 
 ```json
 {
     "beneficiaryClientBankAccountId": 1,
-    "senderClientBankAccountId": 3,
-    "amount": 19.9999,
-    "secretKey": "test"
+    "senderClientBankAccountId": 4,
+    "amount": 1.9999,
+    "secretKey": "Sergei"
 }
 ```
-
 ### Ответ
-
 ```json
 {
-    "executionResult": "FAILED_VALIDITY_EXPIRED"
+    "executionResult": "SUCCESS"
 }
 ```
+
