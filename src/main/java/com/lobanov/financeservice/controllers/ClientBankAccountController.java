@@ -19,7 +19,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/bank_account")
+@RequestMapping("/api/v1/bank-account")
 public class ClientBankAccountController {
     private final ClientBankAccountService clientBankAccountService;
 
