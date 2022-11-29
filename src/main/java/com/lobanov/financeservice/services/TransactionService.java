@@ -65,7 +65,7 @@ public class TransactionService {
         transactionEntity.setBeneficiaryClientAccount(beneficiaryClientBankAccountEntity);
         transactionEntity.setSenderBankAccount(senderClientBankAccountEntity);
 
-        boolean secretKeyMatches = isSecretKeyMatches(transferDtoRequest.getSecretKey(), beneficiaryClientBankAccountEntity.getClientEntity().getSecretKey());
+        boolean secretKeyMatches = isSecretKeyMatches(transferDtoRequest.getSecretKey(), senderClientBankAccountEntity.getClientEntity().getSecretKey());
         boolean validThruBeneficiary = validThru(beneficiaryClientBankAccountEntity.getValidity());
         boolean validThruSender = validThru(senderClientBankAccountEntity.getValidity());
         boolean isSenderClientBankAccountHasEnoughMoney = senderClientBankAccountEntity.getAmount().compareTo(transferDtoRequest.getAmount()) > 0;
@@ -78,7 +78,7 @@ public class TransactionService {
         if (!(validThruBeneficiary && validThruSender)) {
             executionResult = FAILED_VALIDITY_EXPIRED;
             saveResourcesInDataBase(beneficiaryClientBankAccountEntity, senderClientBankAccountEntity, transactionEntity, executionResult);
-            throw new ValidityExpiredException("Client account is overdue");
+            throw new ValidityExpiredException("Client  bank account is overdue");
 
         }
         if (!isSenderClientBankAccountHasEnoughMoney) {

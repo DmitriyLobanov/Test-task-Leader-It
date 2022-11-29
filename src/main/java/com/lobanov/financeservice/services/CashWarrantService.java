@@ -77,7 +77,7 @@ public class CashWarrantService {
         if (!isNotValidityExpired(clientBankAccountEntity.getValidity())) {
             log.info("Bank Account with id: {}  has expired ", clientBankAccountEntity.getId());
             saveResourcesInDataBase(FAILED_VALIDITY_EXPIRED, transactionEntity, cashWarrantEntity);
-            throw new ValidityExpiredException("Client account with id " + clientBankAccountEntity.getId() + " overdue");
+            throw new ValidityExpiredException("Client bank account with id " + clientBankAccountEntity.getId() + " overdue");
         }
         clientBankAccountEntity.setAmount(clientBankAccountEntity.getAmount().add(cashWarrantDtoRequest.getAmount()));
         cashWarrantRepository.save(cashWarrantEntity);
@@ -121,7 +121,7 @@ public class CashWarrantService {
         if (!isNotValidityExpired(clientBankAccountEntity.getValidity())) {
             log.info("Bank Account with id: {}  has expired ", clientBankAccountEntity.getId());
             saveResourcesInDataBase(FAILED_VALIDITY_EXPIRED, transactionEntity, cashWarrantEntity);
-            throw new ValidityExpiredException("Client account with id " + clientBankAccountEntity.getId() + " overdue");
+            throw new ValidityExpiredException("Client bank account with id " + clientBankAccountEntity.getId() + " overdue");
         }
 
         if (!isEnoughMoney) {

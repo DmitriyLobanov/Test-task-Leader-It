@@ -53,7 +53,7 @@ public class ClientBankAccountController {
         ExecutionResult executionResult = null;
 
         executionResult = cashWarrantService.createCashWarrant(cashWarrantDtoRequest);
-        return ResponseEntity.status(HttpStatus.OK).body(new StatusDtoResponse(executionResult));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new StatusDtoResponse(executionResult));
     }
 
 }

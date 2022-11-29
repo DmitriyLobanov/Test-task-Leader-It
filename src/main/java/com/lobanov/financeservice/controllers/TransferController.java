@@ -5,6 +5,7 @@ import com.lobanov.financeservice.dtos.requests.TransferDtoRequest;
 import com.lobanov.financeservice.enums.ExecutionResult;
 import com.lobanov.financeservice.services.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,6 @@ public class TransferController {
     @PostMapping()
     public ResponseEntity<StatusDtoResponse> createTransferBetweenClientBankAccounts(@RequestBody TransferDtoRequest transferDtoRequest) {
         ExecutionResult executionResult = transactionService.createTransferBetweenClientBankAccounts(transferDtoRequest);
-        return ResponseEntity.ok(new StatusDtoResponse(executionResult));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new StatusDtoResponse(executionResult));
     }
 }
