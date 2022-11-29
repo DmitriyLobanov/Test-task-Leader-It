@@ -19,7 +19,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/bank-account")
+@RequestMapping("/api/v1/bank-accounts")
 public class ClientBankAccountController {
     private final ClientBankAccountService clientBankAccountService;
 
@@ -48,7 +48,7 @@ public class ClientBankAccountController {
         return ResponseEntity.ok(allCashWarrantsByClientBankAccountId);
     }
 
-    @PostMapping("/warrant")
+    @PostMapping("/warrants")
     public ResponseEntity<StatusDtoResponse> createCashWarrant(@RequestBody CashWarrantDtoRequest cashWarrantDtoRequest) {
         ExecutionResult executionResult = null;
 

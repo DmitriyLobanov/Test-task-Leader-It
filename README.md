@@ -54,7 +54,7 @@ ________________________
 
 ### Запрос 
 
-### `GET http://localhost:8080/api/v1/bank-account/1`
+### `GET http://localhost:8080/api/v1/bank-accounts/1`
 
 ### Ответ
 ```json
@@ -93,7 +93,7 @@ ________________________
 
 ### Запрос 
 
-### `GET  http://localhost:8080/api/v1/bank-account/1/transactions`
+### `GET  http://localhost:8080/api/v1/bank-accounts/1/transactions`
 
 ### Ответ
 ```json
@@ -123,7 +123,7 @@ ________________________
 
 ### Запрос 
 
-### `GET http://localhost:8080/api/v1/bank-account/1/warrants`
+### `GET http://localhost:8080/api/v1/bank-accounts/1/warrants`
 
 ### Ответ 
 ```json
@@ -149,28 +149,60 @@ ________________________
 
 ## 6.  Создать кассовый ордер
 
-### Запрос 
+### Создание кассового ордера на пополнение 
 
-### `POST localhost:8080/api/v1/bank-account/warrant`
+### `POST localhost:8080/api/v1/bank-accounts/warrants`
 
 ```json
 {
-    "secretKey": "test",
-    "warrantType": "WITHDRAWAL",
+    "warrantType": "REPLENISHMENT",
     "amount": 100,
     "beneficiaryClientAccount": 1
 }
 ```
 
-## Ответ
-### Случай успешного запроса
+### Ответ
 ```json
 {
     "executionResult": "SUCCESS"
 }
 ```
 
-### Случай неправильного секретного слова
+### Создание кассового ордера на снятие
+
+### В случае успеха:
+
+### `POST localhost:8080/api/v1/bank-accounts/warrants`
+
+```json
+{
+  "secretKey": "test",
+  "warrantType": "WITHDRAWAL",
+  "amount": 100,
+  "beneficiaryClientAccount": 1
+}
+```
+### Ответ
+```json
+{
+    "executionResult": "SUCCESS"
+}
+```
+
+### В случае указания неправильного секретного слова
+
+### `POST localhost:8080/api/v1/bank-accounts/warrants`
+
+```json
+{
+    "secretKey": "wrong_secret_key",
+    "warrantType": "WITHDRAWAL",
+    "amount": 100,
+    "beneficiaryClientAccount": 1
+}
+
+```
+### Ответ
 ```json
 {
     "timeStamp": "2022-11-29T13:46:50.719",
@@ -181,7 +213,20 @@ ________________________
 }
 ```
 
-### Случай создания кассового ордера с суммой, превышающей сумму на счете клиента
+### В случае когда сумма снятия больше, чем сумма имеющаяся на счету клиента. 
+
+### `POST localhost:8080/api/v1/bank-accounts/warrants`
+
+```json
+{
+  "secretKey": "test",
+  "warrantType": "WITHDRAWAL",
+  "amount": 10000,
+  "beneficiaryClientAccount": 1
+}
+``` 
+### Ответ
+
 ```json
 {
     "timeStamp": "2022-11-29T13:46:37.598",
@@ -192,20 +237,33 @@ ________________________
 }
 ```
 
-### Случай создания кассового ордера для счета клиента, у которого срок его дейсвитя истек
+### В случае когда срок действия счета клиента истек
+
+### `POST localhost:8080/api/v1/bank-accounts/warrants`
+
 ```json
 {
-    "timeStamp": "2022-11-29T13:48:28.999",
-    "message": "Client bank account with id 3 overdue",
-    "errors": {
-        "exception": "com.lobanov.financeservice.exceptions.ValidityExpiredException"
-    }
+  "secretKey": "test",
+  "warrantType": "WITHDRAWAL",
+  "amount": 10000,
+  "beneficiaryClientAccount": 3
+}
+``` 
+### Ответ
+
+```json
+{
+  "timeStamp": "2022-11-29T15:44:11.6",
+  "message": "Client bank account with id 3 overdue",
+  "errors": {
+    "exception": "com.lobanov.financeservice.exceptions.ValidityExpiredException"
+  }
 }
 ```
 
 ## 7.  Создать перевод между счетами одного пользователя
 
-### Запрос 
+### Запрос в случае успеха
 
 ### `POST http://localhost:8080/api/v1/transfer`
 
@@ -219,26 +277,48 @@ ________________________
 ```
 
 ### Ответ
-
-### Случай успешного запроса
 ```json
 {
     "executionResult": "SUCCESS"
 }
 ```
 
-### Случай неправильного секретного слова
+### В случае указания неправильного пароля
+
+### `POST http://localhost:8080/api/v1/transfer`
+
+````json
+{
+    "beneficiaryClientBankAccountId": 1,
+    "senderClientBankAccountId": 2,
+    "amount": 19.9999,
+    "secretKey": "wrong_secret_key"
+}
+````
+
+### Ответ
 ```json
 {
-    "timeStamp": "2022-11-29T13:53:43.994",
-    "message": "Wrong secret key",
-    "errors": {
-        "exception": "com.lobanov.financeservice.exceptions.WrongSecretKeyException"
-    }
+  "timeStamp": "2022-11-29T15:46:52.133",
+  "message": "Wrong secret key",
+  "errors": {
+    "exception": "com.lobanov.financeservice.exceptions.WrongSecretKeyException"
+  }
 }
 ```
 
-### Случай создания перевода с суммой, превышающей сумму на счете клиента
+### В случае, если у счета отправителя недостаточно денег 
+### `POST http://localhost:8080/api/v1/transfer`
+
+````json
+{
+  "beneficiaryClientBankAccountId": 1,
+  "senderClientBankAccountId": 2,
+  "amount": 1009.9999,
+  "secretKey": "test"
+}
+````
+### Ответ
 ```json
 {
     "timeStamp": "2022-11-29T13:54:20.889",
@@ -249,7 +329,18 @@ ________________________
 }
 ```
 
-### Случай создания перевода для счета клиента, у которого срок его дейсвитя истек
+### В случае, если срок действия счета истек
+### `POST http://localhost:8080/api/v1/transfer`
+
+````json
+{
+  "beneficiaryClientBankAccountId": 1,
+  "senderClientBankAccountId": 3,
+  "amount": 19.99,
+  "secretKey": "test"
+}
+````
+### Ответ
 ```json
 {
     "timeStamp": "2022-11-29T13:54:55.084",
@@ -260,7 +351,6 @@ ________________________
 }
 ```
 
-#
 
 ## 8.  Создать перевод между счетами разных пользователей
 
