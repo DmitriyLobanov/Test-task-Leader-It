@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-//TODO ИЗМЕНИТЬ НАЗВАНИЕ ТАБЛИТЦЫ
 @Table(name = "client_bank_accounts")
 @Data
 @AllArgsConstructor
