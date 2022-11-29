@@ -16,7 +16,7 @@ ________________________
 
 ### `GET http://localhost:8080/api/v1/clients`
 
-### Ответ HttpStatus = 200
+### Ответ 
 ```json
 [
     {
@@ -40,7 +40,7 @@ ________________________
 
 ### `GET http://localhost:8080/api/v1/clients/1`
 
-### Ответ HttpStatus = 200
+### Ответ 
 ```json
 {
     "id": 1,
@@ -56,7 +56,7 @@ ________________________
 
 ### `GET http://localhost:8080/api/v1/bank-account/1`
 
-### Ответ HttpStatus = 200
+### Ответ
 ```json
 [
     {
