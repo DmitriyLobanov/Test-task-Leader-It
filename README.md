@@ -155,9 +155,9 @@ ________________________
 
 ```json
 {
-    "secretKey": "secret_key_test",
+    "secretKey": "test",
     "warrantType": "WITHDRAWAL",
-    "amount": 1000,
+    "amount": 100,
     "beneficiaryClientAccount": 1
 }
 ```
