@@ -24,7 +24,7 @@ public class TransactionEntity {
     @Column(name = "created_date", nullable = false)
     private Instant createdDate;
 
-    @Column(name ="amount", nullable = false)
+    @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
     @Enumerated(value = EnumType.STRING)

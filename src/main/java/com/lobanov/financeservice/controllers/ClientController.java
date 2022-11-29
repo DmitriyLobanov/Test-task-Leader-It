@@ -1,10 +1,8 @@
 package com.lobanov.financeservice.controllers;
 
-import com.lobanov.financeservice.dtos.ClientDto;
-import com.lobanov.financeservice.dtos.CreateClientDto;
+import com.lobanov.financeservice.dtos.responses.ClientDtoResponse;
 import com.lobanov.financeservice.services.ClientService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,14 +16,14 @@ public class ClientController {
     private final ClientService clientService;
 
     @GetMapping
-    public ResponseEntity<List<ClientDto>> getAllClients() {
-        List<ClientDto> clients = clientService.getAllClients();
+    public ResponseEntity<List<ClientDtoResponse>> getAllClients() {
+        List<ClientDtoResponse> clients = clientService.getAllClients();
         return ResponseEntity.ok(clients);
     }
 
     @GetMapping("/{clientId}")
-    public ResponseEntity<ClientDto> getClientById(@PathVariable(name = "clientId") Long clientId) {
-        ClientDto clientDto = clientService.getClientById(clientId);
-        return ResponseEntity.ok(clientDto);
+    public ResponseEntity<ClientDtoResponse> getClientById(@PathVariable(name = "clientId") Long clientId) {
+        ClientDtoResponse clientDtoResponse = clientService.getClientById(clientId);
+        return ResponseEntity.ok(clientDtoResponse);
     }
 }

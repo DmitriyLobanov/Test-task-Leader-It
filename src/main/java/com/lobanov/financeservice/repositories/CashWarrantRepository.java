@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface CashWarrantRepository extends JpaRepository<CashWarrantEntity, Long> {
 
-    @Query("select CW from CashWarrantEntity CW where  CW.clientBankAccountEntity.id =:clientBankAccountId")
+    @Query("select cwe from CashWarrantEntity cwe where  cwe.clientBankAccountEntity.id =:clientBankAccountId")
     List<CashWarrantEntity> findCashWarrantsByClientBankAccountId(Long clientBankAccountId);
 }

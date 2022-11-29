@@ -3,9 +3,11 @@ package com.lobanov.financeservice.mappers;
 import com.lobanov.financeservice.dtos.requests.CashWarrantDtoRequest;
 import com.lobanov.financeservice.dtos.responses.CashWarrantDtoResponse;
 import com.lobanov.financeservice.models.CashWarrantEntity;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@NoArgsConstructor
 public class CashWarrantMapper {
 
     public CashWarrantDtoResponse toDto(CashWarrantEntity entity) {

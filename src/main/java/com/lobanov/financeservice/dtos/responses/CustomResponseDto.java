@@ -1,4 +1,4 @@
-package com.lobanov.financeservice.dtos;
+package com.lobanov.financeservice.dtos.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.util.Map;
 @Builder
 @Data
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-public class CustomResponse {
+public class CustomResponseDto {
     private Integer statusCode;
     private LocalDateTime timeStamp;
     private HttpStatus status;

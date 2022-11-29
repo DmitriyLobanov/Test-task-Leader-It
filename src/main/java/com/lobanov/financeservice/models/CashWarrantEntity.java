@@ -35,7 +35,7 @@ public class CashWarrantEntity {
     private ClientBankAccountEntity clientBankAccountEntity;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "execution_result",nullable = false)
+    @Column(name = "execution_result", nullable = false)
     private ExecutionResult executionResult;
 
     @Column(name = "created_date", nullable = false)

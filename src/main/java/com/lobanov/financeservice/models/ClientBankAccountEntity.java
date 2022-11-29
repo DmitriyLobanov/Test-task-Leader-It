@@ -32,7 +32,7 @@ public class ClientBankAccountEntity {
     @Column(name = "account_type", nullable = false)
     private AccountType accountType;
 
-    @Column(name = "created_date",nullable = false)
+    @Column(name = "created_date", nullable = false)
     private Instant createdDate;
 
     @Column(name = "validity", nullable = false)

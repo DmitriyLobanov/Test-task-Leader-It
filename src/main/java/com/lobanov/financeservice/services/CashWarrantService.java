@@ -17,6 +17,7 @@ import com.lobanov.financeservice.repositories.CashWarrantRepository;
 import com.lobanov.financeservice.repositories.ClientBankAccountRepository;
 import com.lobanov.financeservice.repositories.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ import static com.lobanov.financeservice.enums.ExecutionResult.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CashWarrantService {
     private final CashWarrantRepository cashWarrantRepository;
 
@@ -41,6 +43,7 @@ public class CashWarrantService {
     private final BCryptPasswordEncoder encoder;
 
     public List<CashWarrantDtoResponse> findAllCashWarrantsByClientBankAccountId(Long clientBankAccountId) {
+        log.info("Finding all cash warrants with client bank account id: {}", clientBankAccountId);
         return cashWarrantRepository.findCashWarrantsByClientBankAccountId(clientBankAccountId).stream()
                 .map(cashWarrantMapper::toDto).collect(Collectors.toList());
     }
@@ -50,6 +53,11 @@ public class CashWarrantService {
         ClientBankAccountEntity clientBankAccountEntity = clientBankAccountRepository
                 .findById(cashWarrantDtoRequest.getBeneficiaryClientAccount())
                 .orElseThrow(() -> new ResourceNotFoundException("Client Bank account with id " + cashWarrantDtoRequest.getBeneficiaryClientAccount() + " not found"));
+
+        log.info("Creating cash warrant:  {}; amount: {}; bank account id: {} ",
+                cashWarrantDtoRequest.getWarrantType(),
+                cashWarrantDtoRequest.getAmount(),
+                cashWarrantDtoRequest.getBeneficiaryClientAccount());
 
         executionResult = SUCCESS;
         CashWarrantEntity cashWarrantEntity = cashWarrantMapper.toEntity(cashWarrantDtoRequest);
@@ -67,6 +75,7 @@ public class CashWarrantService {
         transactionEntity.setCashWarrantEntity(cashWarrantEntity);
 
         if (!isNotValidityExpired(clientBankAccountEntity.getValidity())) {
+            log.info("Bank Account with id: {}  has expired ", clientBankAccountEntity.getId());
             saveResourcesInDataBase(FAILED_VALIDITY_EXPIRED, transactionEntity, cashWarrantEntity);
             throw new ValidityExpiredException("Client account with id " + clientBankAccountEntity.getId() + " overdue");
         }
@@ -74,7 +83,6 @@ public class CashWarrantService {
         cashWarrantRepository.save(cashWarrantEntity);
         transactionRepository.save(transactionEntity);
         return executionResult;
-
     }
 
 
@@ -82,6 +90,11 @@ public class CashWarrantService {
         ClientBankAccountEntity clientBankAccountEntity = clientBankAccountRepository
                 .findById(cashWarrantDtoRequest.getBeneficiaryClientAccount())
                 .orElseThrow(() -> new ResourceNotFoundException("Client Bank account with id " + cashWarrantDtoRequest.getBeneficiaryClientAccount() + " not found"));
+
+        log.info("Creating cash warrant:  {}; amount: {}; bank account id: {} ",
+                cashWarrantDtoRequest.getWarrantType(),
+                cashWarrantDtoRequest.getAmount(),
+                cashWarrantDtoRequest.getBeneficiaryClientAccount());
 
         ExecutionResult executionResult;
         CashWarrantEntity cashWarrantEntity = cashWarrantMapper.toEntity(cashWarrantDtoRequest);
@@ -99,19 +112,20 @@ public class CashWarrantService {
         boolean secretKeyMatches = isSecretKeyMatches(cashWarrantDtoRequest.getSecretKey(), clientBankAccountEntity.getClientEntity().getSecretKey());
         boolean isEnoughMoney = clientBankAccountEntity.getAmount().compareTo(cashWarrantDtoRequest.getAmount()) > 0;
 
-        //TODO логгирование
-
         if (!secretKeyMatches) {
+            log.info("Specified the wrong secret word");
             saveResourcesInDataBase(FAILED_WRONG_SECRET_KEY, transactionEntity, cashWarrantEntity);
             throw new WrongSecretKeyException("Invalid secret key");
         }
 
         if (!isNotValidityExpired(clientBankAccountEntity.getValidity())) {
+            log.info("Bank Account with id: {}  has expired ", clientBankAccountEntity.getId());
             saveResourcesInDataBase(FAILED_VALIDITY_EXPIRED, transactionEntity, cashWarrantEntity);
             throw new ValidityExpiredException("Client account with id " + clientBankAccountEntity.getId() + " overdue");
         }
 
         if (!isEnoughMoney) {
+            log.info("Bank Account with id: {}  has not enough money ", clientBankAccountEntity.getId());
             saveResourcesInDataBase(FAILED_NOT_ENOUGH_MONEY, transactionEntity, cashWarrantEntity);
             throw new NotEnoughMoneyException("Not enough money on the account with id " + clientBankAccountEntity.getId());
         }
@@ -134,5 +148,17 @@ public class CashWarrantService {
 
     private boolean isSecretKeyMatches(String rawSecretKey, String encodedSecretKey) {
         return encoder.matches(rawSecretKey, encodedSecretKey);
+    }
+
+    public ExecutionResult createCashWarrant(CashWarrantDtoRequest cashWarrantDtoRequest) {
+        ExecutionResult executionResult = null;
+
+        if (cashWarrantDtoRequest.getWarrantType().equals(WarrantType.REPLENISHMENT))
+            executionResult = this.createReplenishmentCashWarrant(cashWarrantDtoRequest);
+
+        if (cashWarrantDtoRequest.getWarrantType().equals(WarrantType.WITHDRAWAL))
+            executionResult = this.createWithdrawalCashWarrant(cashWarrantDtoRequest);
+
+        return executionResult;
     }
 }

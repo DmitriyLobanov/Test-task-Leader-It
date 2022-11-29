@@ -1,9 +1,8 @@
 package com.lobanov.financeservice.services;
 
-import com.lobanov.financeservice.dtos.TransactionDto;
-import com.lobanov.financeservice.dtos.TransferDto;
+import com.lobanov.financeservice.dtos.responses.TransactionDtoResponse;
+import com.lobanov.financeservice.dtos.requests.TransferDtoRequest;
 import com.lobanov.financeservice.enums.ExecutionResult;
-import com.lobanov.financeservice.enums.TransactionType;
 import com.lobanov.financeservice.exceptions.NotEnoughMoneyException;
 import com.lobanov.financeservice.exceptions.ResourceNotFoundException;
 import com.lobanov.financeservice.exceptions.ValidityExpiredException;
@@ -14,6 +13,7 @@ import com.lobanov.financeservice.models.TransactionEntity;
 import com.lobanov.financeservice.repositories.ClientBankAccountRepository;
 import com.lobanov.financeservice.repositories.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.lobanov.financeservice.enums.ExecutionResult.*;
+import static com.lobanov.financeservice.enums.TransactionType.TRANSFER;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TransactionService {
     private final TransactionRepository transactionRepository;
@@ -32,37 +34,41 @@ public class TransactionService {
     private final BCryptPasswordEncoder encoder;
 
     private final ClientBankAccountRepository clientBankAccountRepository;
+
     private final TransactionMapper transactionMapper;
 
-    public List<TransactionDto> findAllTransactionsByClientBankAccount(Long clientBankAccountId) {
+    public List<TransactionDtoResponse> findAllTransactionsByClientBankAccount(Long clientBankAccountId) {
+        log.info("Finding all transactions by client bank account with id: {}", clientBankAccountId);
         List<TransactionEntity> allTransactionsByClientAccountNumber
                 = transactionRepository.findAllTransactionsByClientBankAccount(clientBankAccountId);
         return allTransactionsByClientAccountNumber.stream()
                 .map(transactionMapper::toDto).collect(Collectors.toList());
     }
 
-    public ExecutionResult createTransferBetweenClientBankAccounts(TransferDto transferDto) {
+    public ExecutionResult createTransferBetweenClientBankAccounts(TransferDtoRequest transferDtoRequest) {
 
         ExecutionResult executionResult = null;
+        log.info("Finding the beneficiary client's bank account by id:{}", transferDtoRequest.getBeneficiaryClientBankAccountId());
         ClientBankAccountEntity beneficiaryClientBankAccountEntity = clientBankAccountRepository
-                .findById(transferDto.getBeneficiaryClientBankAccountId())
+                .findById(transferDtoRequest.getBeneficiaryClientBankAccountId())
                 .orElseThrow(() -> new ResourceNotFoundException("ClientBankAccount not found"));
 
+        log.info("Finding the sender client's bank account by id:{}", transferDtoRequest.getSenderClientBankAccountId());
         ClientBankAccountEntity senderClientBankAccountEntity = clientBankAccountRepository
-                .findById(transferDto.getSenderClientBankAccountId())
+                .findById(transferDtoRequest.getSenderClientBankAccountId())
                 .orElseThrow(() -> new ResourceNotFoundException("ClientBankAccount not found"));
 
         TransactionEntity transactionEntity = new TransactionEntity();
-        transactionEntity.setTransactionType(TransactionType.TRANSFER);
-        transactionEntity.setAmount(transferDto.getAmount());
+        transactionEntity.setTransactionType(TRANSFER);
+        transactionEntity.setAmount(transferDtoRequest.getAmount());
         transactionEntity.setCreatedDate(Instant.now());
         transactionEntity.setBeneficiaryClientAccount(beneficiaryClientBankAccountEntity);
         transactionEntity.setSenderBankAccount(senderClientBankAccountEntity);
 
-        boolean secretKeyMatches = isSecretKeyMatches(transferDto.getSecretKey(), beneficiaryClientBankAccountEntity.getClientEntity().getSecretKey());
+        boolean secretKeyMatches = isSecretKeyMatches(transferDtoRequest.getSecretKey(), beneficiaryClientBankAccountEntity.getClientEntity().getSecretKey());
         boolean validThruBeneficiary = validThru(beneficiaryClientBankAccountEntity.getValidity());
         boolean validThruSender = validThru(senderClientBankAccountEntity.getValidity());
-        boolean isSenderClientBankAccountHasEnoughMoney = senderClientBankAccountEntity.getAmount().compareTo(transferDto.getAmount()) > 0;
+        boolean isSenderClientBankAccountHasEnoughMoney = senderClientBankAccountEntity.getAmount().compareTo(transferDtoRequest.getAmount()) > 0;
 
         if (!secretKeyMatches) {
             executionResult = FAILED_WRONG_SECRET_KEY;
@@ -82,8 +88,8 @@ public class TransactionService {
         }
 
         executionResult = SUCCESS;
-        beneficiaryClientBankAccountEntity.setAmount(beneficiaryClientBankAccountEntity.getAmount().add(transferDto.getAmount()));
-        senderClientBankAccountEntity.setAmount(senderClientBankAccountEntity.getAmount().subtract(transferDto.getAmount()));
+        beneficiaryClientBankAccountEntity.setAmount(beneficiaryClientBankAccountEntity.getAmount().add(transferDtoRequest.getAmount()));
+        senderClientBankAccountEntity.setAmount(senderClientBankAccountEntity.getAmount().subtract(transferDtoRequest.getAmount()));
         saveResourcesInDataBase(beneficiaryClientBankAccountEntity, senderClientBankAccountEntity, transactionEntity, executionResult);
         return executionResult;
     }

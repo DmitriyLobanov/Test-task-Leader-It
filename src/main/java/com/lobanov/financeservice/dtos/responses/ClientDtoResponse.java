@@ -1,4 +1,4 @@
-package com.lobanov.financeservice.dtos;
+package com.lobanov.financeservice.dtos.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ClientDto {
+public class ClientDtoResponse {
 
     private Long id;
 

@@ -1,14 +1,13 @@
-package com.lobanov.financeservice.dtos;
+package com.lobanov.financeservice.dtos.responses;
 
 import com.lobanov.financeservice.enums.ExecutionResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class StatusDto {
+public class StatusDtoResponse {
     private ExecutionResult executionResult;
 }

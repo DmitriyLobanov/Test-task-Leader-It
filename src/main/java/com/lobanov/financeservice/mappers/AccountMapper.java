@@ -1,6 +1,6 @@
 package com.lobanov.financeservice.mappers;
 
-import com.lobanov.financeservice.dtos.ClientBankAccountDto;
+import com.lobanov.financeservice.dtos.responses.ClientBankAccountDtoResponse;
 import com.lobanov.financeservice.models.ClientBankAccountEntity;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class AccountMapper {
 
-    public ClientBankAccountDto toDto(ClientBankAccountEntity entity) {
-        return ClientBankAccountDto.builder()
+    public ClientBankAccountDtoResponse toDto(ClientBankAccountEntity entity) {
+        return ClientBankAccountDtoResponse.builder()
                 .id(entity.getId())
                 .accountNumber(entity.getAccountNumber())
                 .amount(entity.getAmount())

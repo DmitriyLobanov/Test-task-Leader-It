@@ -1,4 +1,4 @@
-package com.lobanov.financeservice.dtos;
+package com.lobanov.financeservice.dtos.requests;
 
 
 import lombok.AllArgsConstructor;
@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransferDto {
+public class TransferDtoRequest {
     private Long beneficiaryClientBankAccountId;
     private Long senderClientBankAccountId;
     private BigDecimal amount;

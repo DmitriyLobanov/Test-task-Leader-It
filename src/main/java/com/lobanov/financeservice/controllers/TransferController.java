@@ -1,7 +1,7 @@
 package com.lobanov.financeservice.controllers;
 
-import com.lobanov.financeservice.dtos.StatusDto;
-import com.lobanov.financeservice.dtos.TransferDto;
+import com.lobanov.financeservice.dtos.responses.StatusDtoResponse;
+import com.lobanov.financeservice.dtos.requests.TransferDtoRequest;
 import com.lobanov.financeservice.enums.ExecutionResult;
 import com.lobanov.financeservice.services.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +19,8 @@ public class TransferController {
     private final TransactionService transactionService;
 
     @PostMapping()
-    public ResponseEntity<StatusDto> createTransferBetweenClientBankAccounts(@RequestBody TransferDto transferDto) {
-        ExecutionResult executionResult = transactionService.createTransferBetweenClientBankAccounts(transferDto);
-        return ResponseEntity.ok(new StatusDto(executionResult));
+    public ResponseEntity<StatusDtoResponse> createTransferBetweenClientBankAccounts(@RequestBody TransferDtoRequest transferDtoRequest) {
+        ExecutionResult executionResult = transactionService.createTransferBetweenClientBankAccounts(transferDtoRequest);
+        return ResponseEntity.ok(new StatusDtoResponse(executionResult));
     }
-
-//    @PostMapping("/between/different")
-//    public ResponseEntity<ExecutionResult> createTransferBetweenDiffClientBankAccounts(@RequestBody TransferDto transferDto) {
-//        ExecutionResult executionResult = transactionService.createTransferBetweenDiffClientBankAccounts(transferDto);
-//        return ResponseEntity.ok(executionResult);
-//    }
-
 }

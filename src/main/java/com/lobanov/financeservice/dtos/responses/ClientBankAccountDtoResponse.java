@@ -1,4 +1,4 @@
-package com.lobanov.financeservice.dtos;
+package com.lobanov.financeservice.dtos.responses;
 
 import com.lobanov.financeservice.enums.AccountType;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ClientBankAccountDto {
+public class ClientBankAccountDtoResponse {
     private Long id;
     private Long accountNumber;
     private BigDecimal amount;

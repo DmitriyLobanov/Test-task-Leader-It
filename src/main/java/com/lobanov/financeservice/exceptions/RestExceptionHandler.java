@@ -1,6 +1,6 @@
 package com.lobanov.financeservice.exceptions;
 
-import com.lobanov.financeservice.dtos.CustomResponse;
+import com.lobanov.financeservice.dtos.responses.CustomResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,24 +16,23 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(value = ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("exception", ex.getClass().getName());
-        return ResponseEntity.status(status)
-                .body(CustomResponse.builder()
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(CustomResponseDto.builder()
                         .timeStamp(now())
                         .message(ex.getMessage())
                         .errors(errorMap)
                         .build()
                 );
     }
+
     @ExceptionHandler(value = NotEnoughMoneyException.class)
     public ResponseEntity<Object> handleNotEnoughMoneyException(NotEnoughMoneyException ex) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("exception", ex.getClass().getName());
-        return ResponseEntity.status(status)
-                .body(CustomResponse.builder()
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(CustomResponseDto.builder()
                         .timeStamp(now())
                         .message(ex.getMessage())
                         .errors(errorMap)
@@ -43,11 +42,10 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(value = WrongSecretKeyException.class)
     public ResponseEntity<Object> handleWrongSecretKeyException(WrongSecretKeyException ex) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("exception", ex.getClass().getName());
-        return ResponseEntity.status(status)
-                .body(CustomResponse.builder()
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(CustomResponseDto.builder()
                         .timeStamp(now())
                         .message(ex.getMessage())
                         .errors(errorMap)
@@ -57,11 +55,10 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(value = ValidityExpiredException.class)
     public ResponseEntity<Object> handleValidityExpiredException(ValidityExpiredException ex) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("exception", ex.getClass().getName());
-        return ResponseEntity.status(status)
-                .body(CustomResponse.builder()
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(CustomResponseDto.builder()
                         .timeStamp(now())
                         .message(ex.getMessage())
                         .errors(errorMap)

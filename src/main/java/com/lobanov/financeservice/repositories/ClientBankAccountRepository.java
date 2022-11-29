@@ -1,6 +1,7 @@
 package com.lobanov.financeservice.repositories;
 
 import com.lobanov.financeservice.models.ClientBankAccountEntity;
+import org.hibernate.annotations.SelectBeforeUpdate;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +14,6 @@ import java.util.Optional;
 public interface ClientBankAccountRepository extends JpaRepository<ClientBankAccountEntity, Long> {
 
     @Override
-//    @EntityGraph(attributePaths = {"clientEntity"})
     @Query("select cbae from ClientBankAccountEntity cbae join ClientEntity ce on cbae.clientEntity.id = ce.id where cbae.id =:clientBankAccountId")
     Optional<ClientBankAccountEntity> findById(Long clientBankAccountId);
 

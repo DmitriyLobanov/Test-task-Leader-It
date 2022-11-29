@@ -1,7 +1,6 @@
 package com.lobanov.financeservice.mappers;
 
-import com.lobanov.financeservice.dtos.ClientDto;
-import com.lobanov.financeservice.dtos.CreateClientDto;
+import com.lobanov.financeservice.dtos.responses.ClientDtoResponse;
 import com.lobanov.financeservice.models.ClientEntity;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -10,21 +9,12 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class ClientMapper {
 
-    public ClientDto toDto(ClientEntity entity) {
-        return ClientDto.builder()
+    public ClientDtoResponse toDto(ClientEntity entity) {
+        return ClientDtoResponse.builder()
                 .id(entity.getId())
                 .firstName(entity.getFirstname())
                 .secondName(entity.getSecondname())
                 .surname(entity.getSurname())
-                .build();
-    }
-
-    public ClientEntity toEntity(CreateClientDto createClientDto) {
-        return ClientEntity.builder()
-                .firstname(createClientDto.getFirstName())
-                .secondname(createClientDto.getSecondName())
-                .surname(createClientDto.getSurname())
-                .secretKey(createClientDto.getSecretKey())
                 .build();
     }
 }

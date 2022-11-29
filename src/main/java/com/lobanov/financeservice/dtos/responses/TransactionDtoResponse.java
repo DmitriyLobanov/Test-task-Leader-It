@@ -1,4 +1,4 @@
-package com.lobanov.financeservice.dtos;
+package com.lobanov.financeservice.dtos.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.lobanov.financeservice.enums.ExecutionResult;
@@ -13,7 +13,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TransactionDto {
+public class TransactionDtoResponse {
     private Long id;
     private Instant createdDate;
     private BigDecimal amount;
